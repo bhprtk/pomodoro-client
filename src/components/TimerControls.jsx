@@ -16,7 +16,8 @@ class TimerControls extends Component {
 					display: 'flex',
 					color: '#696969',
 					fontSize: 18,
-					justifyContent: 'space-around',
+					alignItems: 'center',
+					justifyContent: 'center',
 				}}>
 
 				{this.props.timerRunning ?
@@ -33,7 +34,7 @@ class TimerControls extends Component {
 					</span>
 				}
 
-
+				<span className="dividers">|</span>
 
 				<span
 					className="timer-controls"

@@ -15,11 +15,9 @@ class Timer extends Component {
   }
 
 	componentWillMount() {
-		register();
-	}
-
-	setSession = key => {
-		// this.setState({ session[key]: })
+		if(Notification.permission !== "granted") {
+			Notification.requestPermission();
+		}
 	}
 
 	startSession = (mins = 25) => {
@@ -69,13 +67,17 @@ class Timer extends Component {
 		})
 	}
 
-
 	notify = () => {
-		// var n = new Notification('theTitle')
+		const title = "Session over!!!";
+		const options = {
+			icon: `https://d30y9cdsu7xlg0.cloudfront.net/png/3879-200.png`
+		}
+		var n = new Notification(title, options)
 		// NotificationManager.success('Success message', 'Title here');
 		var audio = new Audio('alarm.mp3');
 		audio.play();
 	}
+
 
 
 	render() {
