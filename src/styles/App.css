@@ -1,3 +1,15 @@
+:root {
+  --lightRed: #EF5350;
+}
+
+.navbar {
+  background: var(--lightRed) !important;
+}
+
+button {
+  outline: none;
+}
+
 .start-buttons {
   background: transparent;
   height: 40px;
@@ -7,8 +19,19 @@
   border-radius: 5px;
 }
 
+.start-buttons-active {
+  background: var(--lightRed);
+  /*background: #E57373;*/
+  color: #fff;
+  border: none;
+  height: 40px;
+  width: 150px;
+  border-radius: 5px;
+}
+
 .start-buttons:hover {
-  background: red;
+  background: var(--lightRed);
+  /*background: #E57373;*/
   color: #fff;
   border: none;
 }
@@ -32,4 +55,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.timer-controls:hover {
+  background: var(--lightRed);
+  /*background: #81C784;*/
+  color: #fff;
+  border: none;
 }

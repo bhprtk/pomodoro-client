@@ -4,6 +4,7 @@ import firebase from 'firebase';
 import register from '../registerServiceWorker'
 import {NotificationContainer, NotificationManager} from 'react-notifications';
 
+import DisplayTime from './DisplayTime';
 import TimerControls from './TimerControls';
 import TimerTypes from './TimerTypes';
 
@@ -11,7 +12,7 @@ class Timer extends Component {
 	state = {
     time: 25 * 60 * 1000,
 		timerRunning: false,
-		currentSession: 25
+		currentSession: 'pomodoro',
   }
 
 	componentWillMount() {
@@ -20,13 +21,25 @@ class Timer extends Component {
 		}
 	}
 
-	startSession = (mins = 25) => {
+	returnMins = sessionType => {
+		if(sessionType === 'pomodoro') {
+			return 25;
+		} else if(sessionType === 'shortBreak') {
+			return 5;
+		} else {
+			return 10;
+		}
+	}
+
+	startSession = sessionType => {
+		let mins = this.returnMins(sessionType);
+
 		clearInterval(this.state.timer)
 		this.setState({
 			time: mins * 60 * 1000,
 			timer: setInterval(this.tick, 1000),
 			timerRunning: true,
-			currentSession: mins
+			currentSession: sessionType,
 		})
 	}
 
@@ -45,14 +58,14 @@ class Timer extends Component {
 
 	stopClock = () => {
 		clearInterval(this.state.timer);
-		this.setState({ timerRunning: false })
+		this.setState({ timerRunning: false	})
 	}
 
 	startClock = () => {
 		if(this.state.timer) {
 			this.setState({
 				timer: setInterval(this.tick, 1000),
-				timerRunning: true
+				timerRunning: true,
 			})
 		} else {
 			this.startSession();
@@ -61,9 +74,10 @@ class Timer extends Component {
 
 	resetClock = () => {
 		clearInterval(this.state.timer);
+		let mins = this.returnMins(this.state.currentSession)
 		this.setState({
 			timerRunning: false,
-			time: this.state.currentSession * 60 * 1000
+			time: mins * 60 * 1000
 		})
 	}
 
@@ -94,14 +108,15 @@ class Timer extends Component {
 
 				<div className="row">
 					<TimerTypes
-						startSession={this.startSession}/>
+						startSession={this.startSession}
+						currentSession={this.state.currentSession}/>
 
 				</div>
 
-				<div className="row">
-					<p className="display-time">{displayTime}</p>
-
-				</div>
+				<DisplayTime
+					timerRunning={this.state.timerRunning}
+					displayTime={displayTime}
+					/>
 
 				<div className="row">
 					<TimerControls

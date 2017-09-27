@@ -1,15 +1,33 @@
 import React, { Component } from 'react';
+import $ from 'jquery';
 
 class TimerTypes extends Component {
 
 	// startPomodoro = () => this.props.setSession('pomodoro')
 
-	startPomodoro = () => this.props.startSession(25)
+	startPomodoro = () => this.props.startSession('pomodoro')
 
-	startShortBreak = () => this.props.startSession(5)
+	startShortBreak = () => this.props.startSession('shortBreak')
 
-	startLongBreak = () => this.props.startSession(10)
+	startLongBreak = () => this.props.startSession('longBreak')
 
+	componentWillReceiveProps(nextProps) {
+		const { currentSession } = nextProps;
+		this.changeActiveColor(currentSession);
+	}
+
+	changeActiveColor = currentSession => {
+		const ids = ['pomodoro', 'shortBreak', 'longBreak'];
+		ids.forEach(id => {
+			if(id === currentSession) {
+				$(`#${id}`).removeClass("start-buttons")
+				$(`#${id}`).addClass("start-buttons-active")
+			} else {
+				$(`#${id}`).removeClass("start-buttons-active")
+				$(`#${id}`).addClass("start-buttons")
+			}
+		})
+	}
 
 	render() {
 		return(
@@ -25,7 +43,8 @@ class TimerTypes extends Component {
 
 
 				<button
-					className="start-buttons"
+					id="pomodoro"
+					className="start-buttons-active"
 					onClick={this.startPomodoro}>
 					pomodoro
 				</button>
@@ -33,6 +52,7 @@ class TimerTypes extends Component {
 				<span className="dividers">|</span>
 
 				<button
+					id="shortBreak"
 					className="start-buttons"
 					onClick={this.startShortBreak}>
 					short break
@@ -41,6 +61,7 @@ class TimerTypes extends Component {
 				<span className="dividers">|</span>
 
 				<button
+					id="longBreak"
 					className="start-buttons"
 					onClick={this.startLongBreak}>
 					long break
