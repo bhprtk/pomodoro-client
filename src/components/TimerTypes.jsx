@@ -36,7 +36,7 @@ class TimerTypes extends Component {
 				style={{
 					display: 'flex',
 					color: '#696969',
-					fontSize: 18,
+					fontSize: 16,
 					alignItems: 'center',
 					justifyContent: 'center',
 				}}>
