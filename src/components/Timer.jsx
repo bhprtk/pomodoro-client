@@ -85,6 +85,7 @@ class Timer extends Component {
 		const title = "Session over!!!";
 		const options = {
 			icon: `https://d30y9cdsu7xlg0.cloudfront.net/png/3879-200.png`
+			// icon: `http://www.toothstudent.com/wp-content/uploads/2017/04/Pomodoro-Icon.png`
 		}
 		var n = new Notification(title, options)
 		// NotificationManager.success('Success message', 'Title here');
