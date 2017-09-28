@@ -68,7 +68,7 @@ class Timer extends Component {
 				timerRunning: true,
 			})
 		} else {
-			this.startSession();
+			this.startSession(this.state.currentSession);
 		}
 	}
 
