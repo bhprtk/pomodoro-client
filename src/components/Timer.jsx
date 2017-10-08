@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import io from 'socket.io-client';
 import moment from 'moment';
 import firebase from 'firebase';
 import register from '../registerServiceWorker'
@@ -8,76 +9,89 @@ import DisplayTime from './DisplayTime';
 import TimerControls from './TimerControls';
 import TimerTypes from './TimerTypes';
 
+// import startSession from './timer';
+
 class Timer extends Component {
 	state = {
-    time: 25 * 60 * 1000,
+    displayTime: moment(25 * 60 * 1000).format('mm:ss'),
 		timerRunning: false,
+		currentTime: 25 * 60 * 1000,
 		currentSession: 'pomodoro',
+		// socket: io('localhost:8000'),
+		socket: io('https://bhprtk-pomodoro.herokuapp.com/'),
   }
 
 	componentWillMount() {
+		const { socket, timerRunning } = this.state;
+
+		socket.on('newTime', ({ displayTime, currentTime }) => {
+			this.setState({ displayTime, currentTime });
+			if(!timerRunning) {
+				this.setState({ timerRunning: true })
+			}
+		})
+
+		socket.on('sessionOver', () => {
+			this.notify();
+		})
+
 		if(Notification.permission !== "granted") {
 			Notification.requestPermission();
 		}
+
+		if('serviceWorker' in navigator) {
+			navigator.serviceWorker.register('/service-worker.js')
+				.then(() => {
+					navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+						this.setState({ serviceWorkerRegistration })
+					})
+				})
+		} else {
+			console.warn('Service workers are not supported in this browser.');
+		}
+
+
 	}
 
-	returnMins = sessionType => {
+	returnMilliseconds = sessionType => {
 		if(sessionType === 'pomodoro') {
-			return 25;
+			return 25 * 60 * 1000;
 		} else if(sessionType === 'shortBreak') {
-			return 5;
+			return 5 * 60 * 1000;
 		} else {
-			return 10;
+			return 10 * 60 * 1000;
 		}
 	}
 
 	startSession = sessionType => {
-		let mins = this.returnMins(sessionType);
-
-		clearInterval(this.state.timer)
+		const { socket } = this.state;
+		let time = this.returnMilliseconds(sessionType)
 		this.setState({
-			time: mins * 60 * 1000,
-			timer: setInterval(this.tick, 1000),
+			currentTime: time,
 			timerRunning: true,
 			currentSession: sessionType,
+			displayTime: moment(time).format('mm:ss')
 		})
-	}
-
-	tick = () => {
-		const { time } = this.state;
-		if(time) {
-			this.setState({ time: time - 1000 })
-			return 1;
-		} else {
-			this.notify()
-			clearInterval(this.state.timer);
-			this.setState({ timerRunning: false })
-			return 0;
-		}
+		socket.emit('startSession', time)
 	}
 
 	stopClock = () => {
-		clearInterval(this.state.timer);
+		this.state.socket.emit('stopClock')
 		this.setState({ timerRunning: false	})
 	}
 
 	startClock = () => {
-		if(this.state.timer) {
-			this.setState({
-				timer: setInterval(this.tick, 1000),
-				timerRunning: true,
-			})
-		} else {
-			this.startSession(this.state.currentSession);
-		}
+		this.state.socket.emit('startSession', this.state.currentTime)
+		this.setState({ timerRunning: true })
 	}
 
 	resetClock = () => {
-		clearInterval(this.state.timer);
-		let mins = this.returnMins(this.state.currentSession)
+		this.state.socket.emit('resetClock')
+		let milliseconds = this.returnMilliseconds(this.state.currentSession)
 		this.setState({
-			timerRunning: false,
-			time: mins * 60 * 1000
+			currentTime: milliseconds,
+			displayTime: moment(milliseconds).format('mm:ss'),
+			timerRunning: false
 		})
 	}
 
@@ -87,15 +101,16 @@ class Timer extends Component {
 			icon: `https://d30y9cdsu7xlg0.cloudfront.net/png/3879-200.png`
 			// icon: `http://www.toothstudent.com/wp-content/uploads/2017/04/Pomodoro-Icon.png`
 		}
-		var n = new Notification(title, options)
+		this.state.serviceWorkerRegistration.showNotification(title, options)
+		// var n = new Notification(title, options)
 		// NotificationManager.success('Success message', 'Title here');
 		var audio = new Audio('alarm.mp3');
 		audio.play();
 	}
 
 
-
 	render() {
+		// const displayTime = moment(this.state.clock).format('mm:ss');
 		const displayTime = moment(this.state.time).format('mm:ss');
 		return (
 			<div
@@ -116,7 +131,7 @@ class Timer extends Component {
 
 				<DisplayTime
 					timerRunning={this.state.timerRunning}
-					displayTime={displayTime}
+					displayTime={this.state.displayTime}
 					/>
 
 				<div className="row">
@@ -128,6 +143,9 @@ class Timer extends Component {
 						/>
 				</div>
 
+				<button onClick={this.notify}>
+					notify
+				</button>
 			</div>
 		)
 
