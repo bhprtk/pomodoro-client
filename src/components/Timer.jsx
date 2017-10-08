@@ -100,7 +100,8 @@ class Timer extends Component {
 		const options = {
 			icon: `https://d30y9cdsu7xlg0.cloudfront.net/png/3879-200.png`
 		}
-		this.state.serviceWorkerRegistration.showNotification(title, options)
+		// this.state.serviceWorkerRegistration.showNotification(title, options)
+		const n = new Notification(title, options);
 		var audio = new Audio('alarm.mp3');
 		audio.play();
 	}
@@ -139,6 +140,7 @@ class Timer extends Component {
 						resetClock={this.resetClock}
 						/>
 				</div>
+
 			</div>
 		)
 
