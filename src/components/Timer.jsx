@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import io from 'socket.io-client';
+// import io from 'socket.io-client';
 import moment from 'moment';
 import firebase from 'firebase';
 import register from '../registerServiceWorker'
@@ -18,37 +18,37 @@ class Timer extends Component {
 		currentTime: 25 * 60 * 1000,
 		currentSession: 'pomodoro',
 		// socket: io('localhost:8000'),
-		socket: io('https://bhprtk-pomodoro.herokuapp.com/'),
+		// socket: io('https://bhprtk-pomodoro.herokuapp.com/'),
   }
 
 	componentWillMount() {
 		const { socket, timerRunning } = this.state;
 
-		socket.on('newTime', ({ displayTime, currentTime }) => {
-			this.setState({ displayTime, currentTime });
-			if(!timerRunning) {
-				this.setState({ timerRunning: true })
-			}
-		})
-
-		socket.on('sessionOver', () => {
-			this.notify();
-		})
+		// socket.on('newTime', ({ displayTime, currentTime }) => {
+		// 	this.setState({ displayTime, currentTime });
+		// 	if(!timerRunning) {
+		// 		this.setState({ timerRunning: true })
+		// 	}
+		// })
+		//
+		// socket.on('sessionOver', () => {
+		// 	this.notify();
+		// })
 
 		if(Notification.permission !== "granted") {
 			Notification.requestPermission();
 		}
 
-		if('serviceWorker' in navigator) {
-			navigator.serviceWorker.register('/service-worker.js')
-				.then(() => {
-					navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
-						this.setState({ serviceWorkerRegistration })
-					})
-				})
-		} else {
-			console.warn('Service workers are not supported in this browser.');
-		}
+		// if('serviceWorker' in navigator) {
+		// 	navigator.serviceWorker.register('/service-worker.js')
+		// 		.then(() => {
+		// 			navigator.serviceWorker.ready.then(serviceWorkerRegistration => {
+		// 				this.setState({ serviceWorkerRegistration })
+		// 			})
+		// 		})
+		// } else {
+		// 	console.warn('Service workers are not supported in this browser.');
+		// }
 
 
 	}
@@ -64,15 +64,27 @@ class Timer extends Component {
 	}
 
 	startSession = sessionType => {
-		const { socket } = this.state;
+		// const { socket } = this.state;
 		let time = this.returnMilliseconds(sessionType)
 		this.setState({
+			intervalID: setInterval(this.tick, 1000),
 			currentTime: time,
 			timerRunning: true,
 			currentSession: sessionType,
 			displayTime: moment(time).format('mm:ss')
 		})
-		socket.emit('startSession', time)
+		// socket.emit('startSession', time)
+	}
+
+	this.tick() {
+		if (this.state.currentTime) {
+			time -= 1000
+			let displayTime = moment(time).format('mm:ss');
+			client.emit('newTime', { displayTime, currentTime: time })
+		} else {
+			clearInterval(intervalID);
+			client.emit('sessionOver')
+		}
 	}
 
 	stopClock = () => {
